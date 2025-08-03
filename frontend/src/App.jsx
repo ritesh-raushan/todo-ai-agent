@@ -12,3 +12,5 @@ function App() {
 }
 
 export default App
+
+// mongodb+srv://riteshraushan:<db_password>@cluster0.fwflunw.mongodb.net/

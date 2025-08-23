@@ -1,5 +1,6 @@
 import './App.css'
 import { PlusCircle } from 'lucide-react'
+import { Kanban } from './components/Kanban'
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
           </button>
         </nav>
       </header>
+      <main>
+        <Kanban />
+      </main>
     </div>
   )
 }

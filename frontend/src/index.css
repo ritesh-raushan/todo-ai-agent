@@ -1,1 +1,104 @@
 @import "tailwindcss";
+
+/* Dark theme tokens (Tailwind violet palette) */
+:root {
+    --bg: 12 14 20; /* deep dark */
+    --panel: 20 22 30; /* panel base */
+    --muted: 156 163 175; /* slate-400 */
+    --text: 228 233 241; /* soft white */
+    --primary: 124 58 237; /* violet-600 */
+    --primary-600: 109 40 217; /* violet-700 */
+    --warning: 245 158 11; /* amber-500 */
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    color: rgb(var(--text));
+    background: rgb(var(--bg));
+    font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+        Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Smooth scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Form controls */
+select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgb(var(--text));
+    padding: 10px 12px;
+    border-radius: 12px;
+}
+
+select:focus {
+    outline: none;
+    border-color: rgba(var(--primary), 0.6);
+    box-shadow: 0 0 0 4px rgba(var(--primary), 0.12);
+}
+
+option {
+    background-color: rgb(var(--panel));
+    color: rgb(var(--text));
+}
+
+/* Minimal background animation */
+.bg-anim {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bg-anim .sheen {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 140vmax;
+    height: 140vmax;
+    background: radial-gradient(
+        closest-side,
+        rgba(var(--primary), 0.18),
+        transparent 70%
+    );
+    filter: blur(40px);
+    animation: drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    0% {
+        transform: translate(-50%, -50%) scale(1) translateX(-40px)
+            translateY(-20px);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.1) translateX(40px)
+            translateY(20px);
+    }
+}

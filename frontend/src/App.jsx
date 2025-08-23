@@ -1,16 +1,20 @@
 import './App.css'
+import { PlusCircle } from 'lucide-react'
 
 function App() {
-
   return (
-    <>
-      <h1 class="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-    </>
+    <div className="app-shell">
+      <header className="app-header">
+        <nav className="navbar">
+          <span className="navbar-title">AI Todo Kanban</span>
+          <button className="button button-primary" style={{ marginLeft: 10 }}>
+            <PlusCircle size={16} />
+            Add Task
+          </button>
+        </nav>
+      </header>
+    </div>
   )
 }
 
 export default App
-
-// mongodb+srv://riteshraushan:<db_password>@cluster0.fwflunw.mongodb.net/

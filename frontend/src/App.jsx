@@ -2,9 +2,13 @@ import './App.css'
 import { PlusCircle } from 'lucide-react'
 import { Kanban } from './components/Kanban'
 import { useRef } from 'react'
+import { useTasks } from './hooks/useTasks'
+import ChatBox from './components/ChatBox'
 
 function App() {
   const kanbanRef = useRef(null)
+  const taskManager = useTasks()
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -17,8 +21,10 @@ function App() {
         </nav>
       </header>
       <main className="app-main">
-        <Kanban ref={kanbanRef} />
+        <Kanban ref={kanbanRef} taskManager={taskManager} />
       </main>
+
+      <ChatBox />
     </div>
   )
 }

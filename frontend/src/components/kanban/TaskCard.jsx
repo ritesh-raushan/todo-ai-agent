@@ -7,7 +7,7 @@ const priorityStyle = {
     low: { bg: 'rgba(109,40,217,0.25)', glow: '0 0 0 6px rgba(109,40,217,0.10)' }
 }
 
-export function TaskCard({ task }) {
+export function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
 
     return (
         <ScaleOnHover>
@@ -22,13 +22,28 @@ export function TaskCard({ task }) {
                         <div style={{ fontWeight: 700, fontFamily: 'Space Mono, monospace' }}>{task.title}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <button className="button button-ghost" title="Toggle complete" style={{ padding: '6px 8px', background: task.status === 'done' ? 'rgba(16,185,129,0.35)' : undefined }}>
+                        <button 
+                            className="button button-ghost" 
+                            title="Toggle complete" 
+                            style={{ padding: '6px 8px', background: task.status === 'done' ? 'rgba(16,185,129,0.35)' : undefined }}
+                            onClick={() => onToggleComplete?.(task)}
+                        >
                             <CheckCircle2 size={14} />
                         </button>
-                        <button className="button button-ghost" title="Edit task" style={{ padding: '6px 8px' }}>
+                        <button 
+                            className="button button-ghost" 
+                            title="Edit task" 
+                            style={{ padding: '6px 8px' }}
+                            onClick={() => onEdit?.(task)}
+                        >
                             <Pencil size={14} />
                         </button>
-                        <button className="button button-ghost" title="Delete task" style={{ padding: '6px 8px', background: 'rgba(239,68,68,0.2)' }}>
+                        <button 
+                            className="button button-ghost" 
+                            title="Delete task" 
+                            style={{ padding: '6px 8px', background: 'rgba(239,68,68,0.2)' }}
+                            onClick={() => onDelete?.(task)}
+                        >
                             <Trash2 size={14} />
                         </button>
                     </div>

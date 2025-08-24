@@ -16,6 +16,10 @@
     border-bottom: none;
 }
 
+.app-main {
+    padding: 20px 24px 24px;
+}
+
 .navbar {
     display: inline-flex;
     align-items: center;
@@ -147,28 +151,10 @@
     backdrop-filter: blur(10px) saturate(160%);
 }
 
-.modal-content {
-    background: rgba(26, 26, 34, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    backdrop-filter: blur(16px) saturate(140%);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+.dragging {
+    transform: rotate(1deg) scale(1.02);
 }
 
-.modal-content input,
-.modal-content textarea,
-.modal-content select {
-    font-family: inherit;
-    font-size: 14px;
-    outline: none;
-}
-
-.modal-content select option {
-    background: rgba(26, 26, 34, 0.95);
-    color: white;
+.ghost {
+    opacity: 0.5;
 }

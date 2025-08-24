@@ -10,13 +10,13 @@ function App() {
       <header className="app-header">
         <nav className="navbar">
           <span className="navbar-title">AI Todo Kanban</span>
-          <button onClick={() => kanbanRef.current?.openCreate()} className="button button-primary" style={{ marginLeft: 10 }}>
+          <button onClick={() => kanbanRef.current?.openCreate()} className="button button-primary" style={{ marginLeft: 10, cursor: 'pointer' }}>
             <PlusCircle size={16} />
             Add Task
           </button>
         </nav>
       </header>
-      <main>
+      <main className="app-main">
         <Kanban ref={kanbanRef} />
       </main>
     </div>

@@ -77,3 +77,93 @@ export const deleteTodo = async (req, res) => {
         });
     }
 };
+
+// Update a todo
+export const updateTodo = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        // Add updatedAt timestamp
+        updateData.updatedAt = new Date();
+        
+        const todo = await Todo.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+        
+        if (!todo) {
+            return res.status(404).json({
+                success: false,
+                message: "Todo not found"
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: todo
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error updating todo",
+            error: error.message
+        });
+    }
+};
+
+// Get a single todo by ID
+export const getTodoById = async (req, res) => {
+    try {
+        const todo = await Todo.findById(req.params.id);
+        
+        if (!todo) {
+            return res.status(404).json({
+                success: false,
+                message: "Todo not found"
+            });
+        }
+        
+        res.status(200).json({
+            success: true,
+            data: todo
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching todo",
+            error: error.message
+        });
+    }
+};
+
+// Get todos grouped by status (for kanban view)
+export const getTodosGrouped = async (req, res) => {
+    try {
+        const todos = await Todo.find().sort({ createdAt: -1 });
+        
+        const grouped = {
+            todo: [],
+            in_progress: [],
+            done: []
+        };
+        
+        todos.forEach(todo => {
+            if (grouped[todo.status]) {
+                grouped[todo.status].push(todo);
+            }
+        });
+        
+        res.status(200).json({
+            success: true,
+            data: grouped
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error fetching grouped todos",
+            error: error.message
+        });
+    }
+};

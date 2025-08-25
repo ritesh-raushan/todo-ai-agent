@@ -4,6 +4,7 @@ import { Kanban } from './components/Kanban'
 import { useRef } from 'react'
 import { useTasks } from './hooks/useTasks'
 import ChatBox from './components/ChatBox'
+import { Toaster } from 'sonner'
 
 function App() {
   const kanbanRef = useRef(null)
@@ -25,6 +26,14 @@ function App() {
       </main>
 
       <ChatBox />
+      <Toaster 
+        theme="dark"
+        position="top-right"
+        richColors
+        expand={false}
+        duration={3000}
+        visibleToasts={4}
+      />
     </div>
   )
 }

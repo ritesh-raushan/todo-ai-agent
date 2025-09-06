@@ -1,16 +1,36 @@
-import { useState, useMemo } from 'react'
-import { nanoid } from 'nanoid'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 
-const initialTasks = [
-    { id: nanoid(), title: 'Go shopping for groceries', description: 'Milk, bread, eggs', status: 'todo', priority: 'medium' },
-    { id: nanoid(), title: 'Plan weekend trip', description: 'Book hotel and car', status: 'todo', priority: 'low' },
-    { id: nanoid(), title: 'Design landing hero', description: 'Refine accents and motion', status: 'in_progress', priority: 'high' },
-    { id: nanoid(), title: 'Update README', description: 'Add setup instructions', status: 'done', priority: 'low' },
-]
+const API_BASE = 'http://localhost:5000/api'
 
 export function useTasks() {
-    const [tasks, setTasks] = useState(initialTasks)
+    const [tasks, setTasks] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    const fetchTodos = async () => {
+        try {
+            setLoading(true)
+            const response = await fetch(`${API_BASE}/todos`)
+            const result = await response.json()
+            
+            if (result.success) {
+                setTasks(result.data)
+                setError(null)
+            } else {
+                setError('Failed to fetch todos')
+            }
+        } catch (err) {
+            setError('Failed to connect to server')
+            toast.error('Connection failed')
+            console.error('Fetch todos error:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+    useEffect(() => {
+        fetchTodos()
+    }, [])
 
     const groupedTasks = useMemo(() => {
         const groups = { todo: [], in_progress: [], done: [] }
@@ -18,48 +38,94 @@ export function useTasks() {
         return groups
     }, [tasks])
 
-    const createTask = (taskData = {}) => {
-        const newTask = {
-            id: nanoid(),
-            title: taskData.title || 'New task',
-            description: taskData.description || '',
-            status: taskData.status || 'todo',
-            priority: taskData.priority || 'medium',
-            createdAt: Date.now(),
+    const createTask = async (taskData = {}) => {
+        try {
+            const response = await fetch(`${API_BASE}/todos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: taskData.title || 'New task',
+                    description: taskData.description || '',
+                    status: taskData.status || 'todo',
+                    priority: taskData.priority || 'medium'
+                })
+            })
+            
+            const result = await response.json()
+            
+            if (result.success) {
+                setTasks(prev => [result.data, ...prev])
+                return result.data
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (err) {
+            setError('Failed to create task')
+            toast.error('Failed to create task')
+            console.error('Create task error:', err)
+            return null
         }
-        setTasks(prev => [newTask, ...prev])
-        return newTask
     }
 
-    const updateTask = (id, updates) => {
-        setTasks(prev => prev.map(task =>
-            task.id === id ? { ...task, ...updates } : task
-        ))
+    const updateTask = async (id, updates) => {
+        try {
+            const response = await fetch(`${API_BASE}/todos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updates)
+            })
+            
+            const result = await response.json()
+            
+            if (result.success) {
+                setTasks(prev => prev.map(task =>
+                    task._id === id ? result.data : task
+                ))
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (err) {
+            setError('Failed to update task')
+            toast.error('Failed to update task')
+            console.error('Update task error:', err)
+        }
     }
 
-    const deleteTask = (id) => {
-        setTasks(prev => prev.filter(task => task.id !== id))
+    const deleteTask = async (id) => {
+        try {
+            const response = await fetch(`${API_BASE}/todos/${id}`, {
+                method: 'DELETE'
+            })
+            
+            const result = await response.json()
+            
+            if (result.success) {
+                // Get task title before removing it
+                const deletedTask = tasks.find(task => task._id === id)
+                setTasks(prev => prev.filter(task => task._id !== id))
+                // No toast for delete - visual feedback is enough
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (err) {
+            setError('Failed to delete task')
+            toast.error('Failed to delete task')
+            console.error('Delete task error:', err)
+        }
     }
 
-    const moveTask = (taskId, newStatus, newIndex = null) => {
-        const task = tasks.find(t => t.id === taskId)
+    const moveTask = async (taskId, newStatus, newIndex = null) => {
+        const task = tasks.find(t => t._id === taskId)
         if (!task) return
+        await updateTask(taskId, { status: newStatus })
+    }
 
-        if (newIndex === null) {
-            // Simple status change
-            updateTask(taskId, { status: newStatus })
-            return
-        }
-
-        // Reorder within column or move between columns
-        const updatedTasks = tasks.filter(t => t.id !== taskId)
-        const updatedTask = { ...task, status: newStatus }
-        const targetColumnTasks = groupedTasks[newStatus].filter(t => t.id !== taskId)
-
-        targetColumnTasks.splice(newIndex, 0, updatedTask)
-        const otherTasks = updatedTasks.filter(t => t.status !== newStatus)
-
-        setTasks([...otherTasks, ...targetColumnTasks])
+    const refreshTasks = () => {
+        fetchTodos()
     }
 
     return {
@@ -68,6 +134,9 @@ export function useTasks() {
         createTask,
         updateTask,
         deleteTask,
-        moveTask
+        moveTask,
+        refreshTasks,
+        loading,
+        error
     }
 }

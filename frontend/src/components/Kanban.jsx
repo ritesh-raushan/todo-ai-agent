@@ -2,11 +2,8 @@ import { useState, forwardRef, useImperativeHandle } from 'react'
 import { DndContext, rectIntersection, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { motion } from 'framer-motion'
-
-import { useTasks } from '../hooks/useTasks'
 import { useModal } from '../hooks/useModal'
 import { parseDragId, parseDropId, createDragId } from '../utils/dragHelpers'
-
 import { Column } from './kanban/Column'
 import { TaskCard } from './kanban/TaskCard'
 import { Modal } from './ui/Modal'
@@ -18,8 +15,8 @@ const COLUMNS = [
     { id: 'done', name: 'Done' },
 ]
 
-export const Kanban = forwardRef(function Kanban(_props, ref) {
-    const { groupedTasks, createTask, updateTask, deleteTask, moveTask } = useTasks()
+export const Kanban = forwardRef(function Kanban({ taskManager }, ref) {
+    const { groupedTasks, createTask, updateTask, deleteTask, moveTask } = taskManager
     const modal = useModal()
     const [activeTaskId, setActiveTaskId] = useState(null)
 
@@ -57,15 +54,15 @@ export const Kanban = forwardRef(function Kanban(_props, ref) {
 
     const handleTaskAction = {
         edit: (task) => modal.open(task),
-        delete: (task) => deleteTask(task.id),
-        toggleDone: (task) => updateTask(task.id, {
+        delete: (task) => deleteTask(task._id),
+        toggleDone: (task) => updateTask(task._id, {
             status: task.status === 'done' ? 'todo' : 'done'
         }),
     }
 
     const handleFormSubmit = (formData) => {
-        if (formData.id) {
-            updateTask(formData.id, formData)
+        if (formData._id) {
+            updateTask(formData._id, formData)
         } else {
             createTask(formData)
         }
@@ -94,12 +91,12 @@ export const Kanban = forwardRef(function Kanban(_props, ref) {
                         tasks={groupedTasks[column.id]}
                         renderItem={(task, index) => (
                             <SortableContext
-                                key={task.id}
-                                items={groupedTasks[column.id].map(t => createDragId(column.id, t.id))}
+                                key={task._id}
+                                items={groupedTasks[column.id].map(t => createDragId(column.id, t._id))}
                                 strategy={verticalListSortingStrategy}
                             >
                                 <TaskCard
-                                    id={createDragId(column.id, task.id)}
+                                    id={createDragId(column.id, task._id)}
                                     task={task}
                                     onEdit={handleTaskAction.edit}
                                     onDelete={handleTaskAction.delete}

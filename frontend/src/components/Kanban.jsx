@@ -16,7 +16,7 @@ const COLUMNS = [
 ]
 
 export const Kanban = forwardRef(function Kanban({ taskManager }, ref) {
-    const { groupedTasks, createTask, updateTask, deleteTask, moveTask } = taskManager
+    const { groupedTasks, createTask, updateTask, deleteTask, moveTask, loading, error, refreshTasks } = taskManager
     const modal = useModal()
     const [activeTaskId, setActiveTaskId] = useState(null)
 
@@ -67,6 +67,48 @@ export const Kanban = forwardRef(function Kanban({ taskManager }, ref) {
             createTask(formData)
         }
         modal.close()
+    }
+
+    if (loading) {
+        return (
+            <div className="kanban">
+                {COLUMNS.map(column => (
+                    <Column
+                        key={column.id}
+                        id={column.id}
+                        title={column.name}
+                        tasks={[]}
+                        renderItem={() => null}
+                    />
+                ))}
+                <div className="loading-overlay">
+                    <div className="loading-spinner">Loading tasks...</div>
+                </div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="kanban">
+                {COLUMNS.map(column => (
+                    <Column
+                        key={column.id}
+                        id={column.id}
+                        title={column.name}
+                        tasks={[]}
+                        renderItem={() => null}
+                    />
+                ))}
+                <div className="error-overlay">
+                    <div className="error-message">
+                        <h3>Error loading tasks</h3>
+                        <p>{error}</p>
+                        <button onClick={refreshTasks}>Retry</button>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (

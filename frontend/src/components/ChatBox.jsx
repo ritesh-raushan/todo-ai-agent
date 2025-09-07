@@ -1,23 +1,24 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Maximize2, Minimize2 } from 'lucide-react'
+import { useChat } from '../hooks/useChat'
 
 
-export function ChatBox() {
+export function ChatBox({ taskManager }) {
     const [isOpen, setIsOpen] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
     const [messages, setMessages] = useState([
         {
             id: 1,
             type: 'ai',
-            content: 'How can I help you today?',
+            content: 'Hi! I can help you manage your tasks. Tell me what you need to do and I\'ll help you organize it!',
             timestamp: Date.now()
         }
     ])
-    const [isTyping, setIsTyping] = useState(false)
     const [inputValue, setInputValue] = useState('')
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
+    const { sendMessage, createTasksFromChat, isLoading } = useChat()
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -25,7 +26,7 @@ export function ChatBox() {
 
     useEffect(() => {
         scrollToBottom()
-    }, [messages, isTyping])
+    }, [messages, isLoading])
 
     // Auto-focus input when chat opens
     useEffect(() => {
@@ -38,40 +39,58 @@ export function ChatBox() {
 
     // Simple focus maintenance after sending message
     useEffect(() => {
-        if (isOpen && !isTyping && inputRef.current) {
+        if (isOpen && !isLoading && inputRef.current) {
             inputRef.current.focus()
         }
-    }, [isOpen, isTyping])
+    }, [isOpen, isLoading])
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault()
 
-        if (!inputValue.trim() || isTyping) return
+        if (!inputValue.trim() || isLoading) return
 
+        const messageText = inputValue.trim()
+        
         // Add user message
         const userMessage = {
             id: Date.now(),
             type: 'user',
-            content: inputValue,
+            content: messageText,
             timestamp: Date.now()
         }
 
         setMessages(prev => [...prev, userMessage])
         setInputValue('')
-        setIsTyping(true)
 
-        // Simulate AI response after 1 second
-        setTimeout(() => {
+        try {
+            // Send message to AI
+            const response = await sendMessage(messageText)
+            
             const aiMessage = {
                 id: Date.now() + 1,
                 type: 'ai',
-                content: 'How can I help you today?',
+                content: response.message,
                 timestamp: Date.now()
             }
+            
             setMessages(prev => [...prev, aiMessage])
-            setIsTyping(false)
-        }, 1000)
+            
+            // Only refresh tasks if the AI performed task-modifying actions
+            if (response.tasksModified && taskManager?.refreshTasks) {
+                taskManager.refreshTasks()
+            }
+            
+        } catch (error) {
+            const errorMessage = {
+                id: Date.now() + 1,
+                type: 'ai',
+                content: 'Sorry, I encountered an error. Please try again.',
+                timestamp: Date.now()
+            }
+            setMessages(prev => [...prev, errorMessage])
+        }
     }
+
 
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded)
@@ -190,7 +209,7 @@ export function ChatBox() {
                             {messages.map((message) => (
                                 <ChatMessage key={message.id} message={message} isExpanded={isExpanded} />
                             ))}
-                            {isTyping && <TypingIndicator />}
+                            {isLoading && <TypingIndicator />}
                             <div ref={messagesEndRef} />
                         </div>
 
@@ -201,7 +220,7 @@ export function ChatBox() {
                                     ref={inputRef}
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder={isTyping ? "AI is typing..." : (isExpanded ? "Type a message to your AI assistant..." : "Ask me anything...")}
+                                    placeholder={isLoading ? "AI is typing..." : (isExpanded ? "Type a message to your AI assistant..." : "Ask me anything...")}
                                     className="flex-1 rounded-lg px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 text-white"
                                     style={{
                                         background: 'rgba(26,26,34,0.50)',
@@ -216,13 +235,13 @@ export function ChatBox() {
                                         e.target.style.borderColor = 'rgba(255,255,255,0.10)'
                                         e.target.style.boxShadow = 'none'
                                     }}
-                                    disabled={isTyping}
+                                    disabled={isLoading}
                                 />
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    disabled={!inputValue.trim() || isTyping}
+                                    disabled={!inputValue.trim() || isLoading}
                                     className="w-10 h-10 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg flex items-center justify-center text-white transition-colors"
                                 >
                                     <Send size={16} />
@@ -310,5 +329,6 @@ function TypingIndicator() {
         </motion.div>
     )
 }
+
 
 export default ChatBox

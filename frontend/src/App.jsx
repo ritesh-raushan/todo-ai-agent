@@ -25,7 +25,7 @@ function App() {
         <Kanban ref={kanbanRef} taskManager={taskManager} />
       </main>
 
-      <ChatBox />
+      <ChatBox taskManager={taskManager} />
       <Toaster 
         theme="dark"
         position="top-right"

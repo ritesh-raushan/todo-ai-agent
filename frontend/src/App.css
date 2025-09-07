@@ -164,7 +164,7 @@
 /* Loading and Error States */
 .loading-overlay,
 .error-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -174,9 +174,7 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    border-radius: 14px;
-    z-index: 10;
-    min-height: 400px;
+    z-index: 50;
 }
 
 .loading-spinner {
